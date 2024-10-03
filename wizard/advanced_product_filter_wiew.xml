@@ -7,6 +7,7 @@
         <form string="Sube el archivo .M para la generación de factura">
             <sheet>
             <separator string="Filtros" />
+                <field name="document_id" invisible="1" />
                 <group>
                     <group>
                         <field name="product_family" widget="selection"/>

@@ -11,4 +11,3 @@ class AdvancedProductFilterLineWizard(models.TransientModel):
     wizard_id = fields.Many2one('advanced.product.filter.wizard', string="Wizard", ondelete='cascade')
 
 
-

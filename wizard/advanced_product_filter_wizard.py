@@ -4,6 +4,22 @@ from odoo.exceptions import UserError
 class AdvancedProductFilterWizard(models.TransientModel):
     _name="advanced.product.filter.wizard"
 
+    @api.model
+    def default_get(self, default_fields):
+        rec = super(AdvancedProductFilterWizard, self).default_get(default_fields)
+        active_ids = self._context.get('active_ids')
+        active_model = self._context.get('active_model')
+
+        rec.update({
+            'document_id': active_ids[0],
+            'document_model': active_model,
+        })
+        return rec
+
+    document_id = fields.Integer('Document ID')
+    document_model = fields.Char('Document Model')
+
+
     product_family = fields.Many2one(
         comodel_name='product.attribute.value',
         string="Familia",
@@ -62,7 +78,6 @@ class AdvancedProductFilterWizard(models.TransientModel):
         relation='wizard_product_search_rel'  # Custom relation table for search results
     )
     line_wizard_ids = fields.One2many('advanced.product.filter.line.wizard', 'wizard_id', string="Lines")
-
 
     def action_search(self):
         domain = [('product_cosal', 'in', ('rollo', 'hoja'))]
@@ -131,58 +146,77 @@ class AdvancedProductFilterWizard(models.TransientModel):
             'result_ids': False
         })
 
-
-
     def action_add(self):
-        purchase_order_id = self.env.context.get('active_id') 
-        if not purchase_order_id:
-            raise UserError('No purchase order found.')
-        purchase_order = self.env['purchase.order'].browse(purchase_order_id)
-
-        print("Selected Products to add:")
-        print(self.result_ids)
-        if not self.result_ids:
-            raise UserError('No products were selected.')
-        new_lines = []
-        for product in self.result_ids:
-            print(f"Adding product: {product.name} (ID: {product.id})")
-
-            existing_line = self.env['purchase.order.line'].search([
-                ('order_id', '=', purchase_order.id),
-                ('product_id', '=', product.id)
-            ])
+        if not self.document_id or not self.document_model:
+            raise UserError('No document found.')
+        
+        # PURCHASE ORDER
+        if self.document_model == 'purchase.order':
+            purchase_order = self.env['purchase.order'].browse(self.document_id)
+            purchase_order_line_obj = self.env['purchase.order.line'] 
+            if not purchase_order:
+                raise UserError('No purchase order found.')
             
-            if existing_line:
-                print(f"Product {product.name} already exists in the purchase order.")
-                continue
+            if not self.result_ids:
+                raise UserError('No products were selected.')
+            new_vals_list = []
+            for product in self.result_ids:             
+                new_line = {
+                                'order_id': purchase_order.id,
+                                'product_id': product.id,
+                                'name': product.display_name,
+                                'date_planned': fields.Date.today(),
+                                'product_qty': 1,
+                                'product_uom': product.uom_po_id.id,
+                                'price_unit': product.standard_price
+                        }
+                new_vals_list.append(new_line)
+            if new_vals_list:
+                for dictvls in new_vals_list:
+                    purchase_order_line_obj.create(dictvls)
+        
+        if self.document_model == 'sale.order':
+            sale_order = self.env['sale.order'].browse(self.document_id)
+            sale_order_line_obj = self.env['sale.order.line'] 
+            if not sale_order:
+                raise UserError('No purchase order found.')
             
-            # Add the product to the purchase order
-            new_line = (0, 0, {
-                'product_id': product.id,
-                'product_qty': 1.0, 
-                'price_unit': product.standard_price,  
-                'date_planned': fields.Date.today(), 
-            })
-            new_lines.append(new_line)
-        if new_lines:
-            print(f"Adding the following lines to the purchase order: {new_lines}")
-            purchase_order.write({'order_line': new_lines})
+            if not self.result_ids:
+                raise UserError('No products were selected.')
+            new_vals_list = []
+            for product in self.result_ids:             
+                new_line = {
+                                'order_id': sale_order.id,
+                                'product_id': product.id,
+                                'name': product.display_name,
+                                'product_qty': 1,
+                                'product_uom': product.uom_po_id.id,
+                                'price_unit': product.standard_price
+                        }
+                new_vals_list.append(new_line)
+            if new_vals_list:
+                for dictvls in new_vals_list:
+                    sale_order_line_obj.create(dictvls)
+
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Purchase Order',
-            'res_model': 'purchase.order',
-            'res_id': purchase_order.id,
+            'name': 'Document',
+            'res_model': self.document_model,
+            'res_id': self.document_id,
             'view_mode': 'form',
             'view_type': 'form',
             'target': 'current',
         }
 
     def action_save_products(self):
-        result_products = self.result_ids
+        # result_products = self.result_ids
+        result_ids = self.result_ids.ids if self.result_ids else []
         for line in self.line_wizard_ids:
             if line.to_add:
-                result_products |= line.product_id
-        self.result_ids = result_products
+                #result_products |= line.product_id
+                result_ids.append(line.product_id.id)
+        #self.result_ids = result_products
+        self.result_ids = [(6,0, result_ids)]
         return {
             'view_mode': 'form',
             'res_model': 'advanced.product.filter.wizard',

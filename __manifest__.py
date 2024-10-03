@@ -11,6 +11,7 @@ Advanced Product Filter for Cosal
         'security/ir.model.access.csv',
         'wizard/advanced_product_filter_wiew.xml',
         'views/purchase_order_view.xml',
+        'views/sale_order_view.xml'
     ],
     'images': ['static/description/icon.png'],
     'installable': True,
