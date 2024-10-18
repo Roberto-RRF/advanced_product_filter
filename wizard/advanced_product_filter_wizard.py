@@ -173,7 +173,33 @@ class AdvancedProductFilterWizard(models.TransientModel):
                 new_vals_list.append(new_line)
             if new_vals_list:
                 for dictvls in new_vals_list:
-                    purchase_order_line_obj.create(dictvls)
+                        purchase_order_line_obj.create(dictvls)
+        # MRP PRODUCTION
+        if self.document_model == 'mrp.production':
+            mrp_production = self.env['mrp.production'].browse(self.document_id)
+            if not mrp_production:
+                raise UserError('No manufacturing order found.')
+            
+            if not self.result_ids:
+                raise UserError('No products were selected.')
+            
+            for product in self.result_ids:
+                component_vals = {
+                    'name': product.display_name,
+                    'product_id': product.id,
+                    'product_uom_qty': 1,  # Quantity of the component (raw material)
+                    'product_uom': product.uom_id.id,  # Unit of measure
+                    'production_id': mrp_production.id,  # Production order reference
+                    'location_id': mrp_production.location_src_id.id,  # Source location (components warehouse)
+                    'location_dest_id': mrp_production.location_dest_id.id,  # Destination location (production location)
+                    'raw_material_production_id': mrp_production.id,  # Important: link to the production order as a raw material
+                    'company_id': mrp_production.company_id.id,  # Company context
+                    'state': 'draft',  # Stock move state (draft until confirmed)
+                }
+                # Add product to the manufacturing order components list
+                mrp_production.move_raw_ids.create(component_vals)
+
+
         
         if self.document_model == 'sale.order':
             sale_order = self.env['sale.order'].browse(self.document_id)
