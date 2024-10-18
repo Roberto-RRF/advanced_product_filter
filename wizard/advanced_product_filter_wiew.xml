@@ -20,7 +20,8 @@
                         <field name="product_grams" widget="selection"/>
                         <field name="product_centro" widget="selection"/>
                         <field name="product_diametro" widget="selection"/>
-
+                        <field name="product_ancho" widget="selection"/>
+                        <field name="product_largo" widget="selection"/>        
                     </group>
                 </group>
                                 

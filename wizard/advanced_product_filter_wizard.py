@@ -71,6 +71,18 @@ class AdvancedProductFilterWizard(models.TransientModel):
         change_default=True,
         domain="[('attribute_id.attribute_cosal', '=', 'certificado')]")
     
+    product_ancho = fields.Many2one(
+        comodel_name='product.attribute.value',
+        string="Ancho cm",
+        change_default=True,
+        domain="[('attribute_id.attribute_cosal', '=', 'ancho')]")
+    product_largo = fields.Many2one(
+        comodel_name='product.attribute.value',
+        string="Largo cm",
+        change_default=True,
+        domain="[('attribute_id.attribute_cosal', '=', 'largo')]")
+
+
     result_ids = fields.Many2many(
         comodel_name='product.product',
         string='Search Results',
@@ -104,7 +116,10 @@ class AdvancedProductFilterWizard(models.TransientModel):
             attribute_ids.append(('product_template_attribute_value_ids','=',self.product_diametro.name))
         if self.product_certificate:
             attribute_ids.append(('product_template_attribute_value_ids','=',self.product_certificate.name))
-
+        if self.product_largo:
+            attribute_ids.append(('product_template_attribute_value_ids','=',self.product_largo.name))
+        if self.product_ancho:
+            attribute_ids.append(('product_template_attribute_value_ids','=',self.product_ancho.name))
         # Add to the domain only if there are attribute_ids
         for attribute_id in attribute_ids:
             domain.append(attribute_id)
