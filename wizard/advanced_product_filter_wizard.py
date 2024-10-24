@@ -19,7 +19,14 @@ class AdvancedProductFilterWizard(models.TransientModel):
     document_id = fields.Integer('Document ID')
     document_model = fields.Char('Document Model')
 
-
+    type_cosal = fields.Selection(
+        [
+            ('',''),
+            ('hoja', 'Hoja'),
+            ('rollo', 'Rollo'),
+        ],
+        string='Tipo',
+    )
     product_family = fields.Many2one(
         comodel_name='product.attribute.value',
         string="Familia",
@@ -70,7 +77,6 @@ class AdvancedProductFilterWizard(models.TransientModel):
         string="Certificado",
         change_default=True,
         domain="[('attribute_id.attribute_cosal', '=', 'certificado')]")
-    
     product_ancho = fields.Many2one(
         comodel_name='product.attribute.value',
         string="Ancho cm",
@@ -81,8 +87,10 @@ class AdvancedProductFilterWizard(models.TransientModel):
         string="Largo cm",
         change_default=True,
         domain="[('attribute_id.attribute_cosal', '=', 'largo')]")
-
-
+    product_tag = fields.Many2one(
+        'product.tag', 
+        string="Tag de Producto"
+    )
     result_ids = fields.Many2many(
         comodel_name='product.product',
         string='Search Results',
@@ -91,10 +99,27 @@ class AdvancedProductFilterWizard(models.TransientModel):
     )
     line_wizard_ids = fields.One2many('advanced.product.filter.line.wizard', 'wizard_id', string="Lines")
 
+    def action_add_all(self):
+        # result_products = self.result_ids
+        result_ids = self.result_ids.ids if self.result_ids else []
+        for line in self.line_wizard_ids:
+            result_ids.append(line.product_id.id)
+        #self.result_ids = result_products
+        self.result_ids = [(6,0, result_ids)]
+        return {
+            'view_mode': 'form',
+            'res_model': 'advanced.product.filter.wizard',
+            'res_id': self.id,
+            'type': 'ir.actions.act_window',
+            'target':'new'
+            }
+
     def action_search(self):
-        domain = [('product_cosal', 'in', ('rollo', 'hoja'))]
+        domain = []
         attribute_ids = []
 
+        if self.type_cosal:
+            domain.append(('product_cosal', '=', self.type_cosal))
         # Collecting the selected attribute ids from the fields
         if self.product_family:
             attribute_ids.append(('product_template_attribute_value_ids','=',self.product_family.name))
@@ -120,6 +145,8 @@ class AdvancedProductFilterWizard(models.TransientModel):
             attribute_ids.append(('product_template_attribute_value_ids','=',self.product_largo.name))
         if self.product_ancho:
             attribute_ids.append(('product_template_attribute_value_ids','=',self.product_ancho.name))
+        if self.product_tag_id:
+            domain.append(('product_tag_ids', '=', self.product_tag_id.id))
         # Add to the domain only if there are attribute_ids
         for attribute_id in attribute_ids:
             domain.append(attribute_id)

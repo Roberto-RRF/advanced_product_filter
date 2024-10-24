@@ -10,6 +10,7 @@
                 <field name="document_id" invisible="1" />
                 <group>
                     <group>
+                        <field name="type_cosal"/>
                         <field name="product_family" widget="selection"/>
                         <field name="product_subfamily" widget="selection"/>
                         <field name="product_type" widget="selection"/>
@@ -22,6 +23,7 @@
                         <field name="product_diametro" widget="selection"/>
                         <field name="product_ancho" widget="selection"/>
                         <field name="product_largo" widget="selection"/>        
+                        <field name="product_tag" widget="selection"/>        
                     </group>
                 </group>
                                 
@@ -31,6 +33,9 @@
                     </div>
                     <div style="display: inline-block; margin-right: 15px;">
                         <button string="Restablecer campos" type="object" name="action_restore_fields" class="btn-secondary"/>
+                    </div>                         
+                    <div style="display: inline-block; margin-right: 15px;">
+                        <button string="Salvar todos los Productos" type="object" name="action_add_all" class="btn-secondary"/>
                     </div>                    
                     <div style="display: inline-block;">
                         <button string="Salvar Productos" type="object" name="action_save_products" class="btn-success "/>
