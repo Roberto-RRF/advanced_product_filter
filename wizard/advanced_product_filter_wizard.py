@@ -89,7 +89,7 @@ class AdvancedProductFilterWizard(models.TransientModel):
         domain="[('attribute_id.attribute_cosal', '=', 'largo')]")
     product_tag = fields.Many2one(
         'product.tag', 
-        string="Tag de Producto"
+        string="Product Tag"
     )
     result_ids = fields.Many2many(
         comodel_name='product.product',
@@ -145,8 +145,8 @@ class AdvancedProductFilterWizard(models.TransientModel):
             attribute_ids.append(('product_template_attribute_value_ids','=',self.product_largo.name))
         if self.product_ancho:
             attribute_ids.append(('product_template_attribute_value_ids','=',self.product_ancho.name))
-        if self.product_tag_id:
-            domain.append(('product_tag_ids', '=', self.product_tag_id.id))
+        if self.product_tag:
+            domain.append(('product_tag_ids', 'in', self.product_tag.ids))
         # Add to the domain only if there are attribute_ids
         for attribute_id in attribute_ids:
             domain.append(attribute_id)
