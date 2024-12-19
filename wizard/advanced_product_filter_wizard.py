@@ -146,7 +146,7 @@ class AdvancedProductFilterWizard(models.TransientModel):
         if self.product_ancho:
             attribute_ids.append(('product_template_attribute_value_ids','=',self.product_ancho.name))
         if self.product_tag:
-            domain.append(('product_tag_ids', 'in', self.product_tag.ids))
+            domain.append(('additional_product_tag_ids', 'in', self.product_tag.ids))
         # Add to the domain only if there are attribute_ids
         for attribute_id in attribute_ids:
             domain.append(attribute_id)
