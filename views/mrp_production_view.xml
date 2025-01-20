@@ -4,6 +4,11 @@
         <field name="model">mrp.production</field>
         <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
         <field name="arch" type="xml">
+            <!-- Modify decimals on view -->
+            <field name="product_qty" position="attributes">
+                <attribute name="digits">[2,2]</attribute>
+            </field>
+            
             <xpath expr="//notebook/page/field[@name='move_raw_ids']" position="before">
                 <button 
                     name="%(action_advanced_product_filter_wizard)d" 

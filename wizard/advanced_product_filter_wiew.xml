@@ -11,19 +11,19 @@
                 <group>
                     <group>
                         <field name="type_cosal"/>
-                        <field name="product_family" widget="selection"/>
-                        <field name="product_subfamily" widget="selection"/>
-                        <field name="product_type" widget="selection"/>
-                        <field name="product_color" widget="selection"/>
-                        <field name="product_certificate" widget="selection"/>
+                        <field name="product_family" />
+                        <field name="product_subfamily" />
+                        <field name="product_type" />
+                        <field name="product_color" />
+                        <field name="product_certificate" />
                     </group>
                     <group>
-                        <field name="product_grams" widget="selection"/>
-                        <field name="product_centro" widget="selection"/>
-                        <field name="product_diametro" widget="selection"/>
-                        <field name="product_ancho" widget="selection"/>
-                        <field name="product_largo" widget="selection"/>        
-                        <field name="product_tag" widget="selection"/>        
+                        <field name="product_grams" />
+                        <field name="product_centro" />
+                        <field name="product_diametro" />
+                        <field name="product_ancho" />
+                        <field name="product_largo" />        
+                        <field name="product_tag" />        
                     </group>
                 </group>
                                 
