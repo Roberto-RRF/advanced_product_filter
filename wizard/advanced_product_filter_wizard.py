@@ -14,7 +14,28 @@ class AdvancedProductFilterWizard(models.TransientModel):
             'document_id': active_ids[0],
             'document_model': active_model,
         })
+
+        if active_model == 'mrp.production' and active_ids:
+            mrp_production = self.env['mrp.production'].browse(active_ids[0])
+            if mrp_production:
+                product_id = mrp_production.product_id
+                product_template_values = product_id.product_template_attribute_value_ids
+
+                # Map product.template.attribute.value to product.attribute.value
+                rec.update({
+                    'product_family': self._get_product_attribute_value(product_template_values, "Familia"),
+                    'product_subfamily': self._get_product_attribute_value(product_template_values, "Subfamilia"),
+                    'product_type': self._get_product_attribute_value(product_template_values, "Tipo"),
+                    'product_grams': self._get_product_attribute_value(product_template_values, "Gramos"),
+                })
+
         return rec
+
+    def _get_product_attribute_value(self, template_values, attribute_name):
+        """Helper method to map product.template.attribute.value to product.attribute.value"""
+        attribute_value = template_values.filtered(lambda v: v.attribute_id.name == attribute_name)
+        return attribute_value.product_attribute_value_id.id if attribute_value else False
+        
 
     document_id = fields.Integer('Document ID')
     document_model = fields.Char('Document Model')
