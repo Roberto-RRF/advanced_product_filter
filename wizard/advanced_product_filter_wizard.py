@@ -246,21 +246,20 @@ class AdvancedProductFilterWizard(models.TransientModel):
             if not self.result_ids:
                 raise UserError('No products were selected.')
             
+            component_vals = []
             for product in self.result_ids:
-                component_vals = {
-                    'name': product.display_name,
+                component_vals.append({
+
                     'product_id': product.id,
                     'product_uom_qty': 1,  # Quantity of the component (raw material)
                     'product_uom': product.uom_id.id,  # Unit of measure
-                    'production_id': mrp_production.id,  # Production order reference
-                    'location_id': mrp_production.location_src_id.id,  # Source location (components warehouse)
-                    'location_dest_id': mrp_production.location_dest_id.id,  # Destination location (production location)
-                    'raw_material_production_id': mrp_production.id,  # Important: link to the production order as a raw material
-                    'company_id': mrp_production.company_id.id,  # Company context
-                    'state': 'draft',  # Stock move state (draft until confirmed)
-                }
-                # Add product to the manufacturing order components list
-                mrp_production.move_raw_ids.create(component_vals)
+                    'production_id': mrp_production.id,  
+                    'raw_material_production_id': mrp_production.id, 
+                    'state':'draft'
+                })
+            
+            # Create raw materials in the manufacturing order
+            mrp_production.move_raw_ids.create(component_vals)
 
 
         
